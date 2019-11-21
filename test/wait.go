@@ -33,20 +33,23 @@ and an `error` to indicate if there was an error.
 package test
 
 import (
+	"encoding/json"
 	"time"
+
+	"testing"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"knative.dev/pkg/apis"
-	"testing"
 )
 
 const (
 	interval = 1 * time.Second
-	timeout  = 10 * time.Second
+	timeout  = 10000 * time.Second
 )
 
 // WaitFor waits for the specified ConditionFunc every internal until the timeout.
@@ -81,6 +84,28 @@ func eventListenerReady(t *testing.T, c *clients, namespace, name string) wait.C
 	}
 }
 
+// deploymentChangeProgressDeadline change deployment progressDeadlineSeconds
+func deploymentChangeProgressDeadline(t *testing.T, c *clients, namespace, name string) error {
+	patch := []struct {
+		Op    string `json:"op"`
+		Path  string `json:"path"`
+		Value int32  `json:"value"`
+	}{
+		{
+			Op:    "replace",
+			Path:  "/spec/progressDeadlineSeconds",
+			Value: 6000,
+		},
+	}
+	payloadBytes, err := json.Marshal(patch)
+	if err != nil {
+		return err
+	}
+
+	_, err = c.KubeClient.AppsV1().Deployments(namespace).Patch(name, types.JSONPatchType, payloadBytes)
+	return err
+}
+
 // deploymentNotExist returns a function that checks if the specified Deployment does not exist
 func deploymentNotExist(t *testing.T, c *clients, namespace, name string) wait.ConditionFunc {
 	return func() (bool, error) {
@@ -90,6 +115,19 @@ func deploymentNotExist(t *testing.T, c *clients, namespace, name string) wait.C
 		}
 		return false, nil
 	}
+}
+
+// deploymentExist returns a function that checks if the specified Deployment exist
+func deploymentExist(t *testing.T, c *clients, namespace, name string) wait.ConditionFunc {
+        return func() (bool, error) {
+                _, err := c.KubeClient.AppsV1().Deployments(namespace).Get(name, metav1.GetOptions{})
+                if err != nil && errors.IsNotFound(err) {
+                        return false, nil
+                } else if errors.IsNotFound(err) {
+                        return false, err
+                }
+                return true, nil
+        }
 }
 
 // serviceNotExist returns a function that checks if the specified Service does not exist

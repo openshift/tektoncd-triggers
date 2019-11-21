@@ -238,6 +238,14 @@ func TestEventListenerCreate(t *testing.T) {
 		t.Fatalf("Failed to create EventListener: %s", err)
 	}
 
+        if err = WaitFor(deploymentExist(t, c, namespace, fmt.Sprintf("%s-%s", eventReconciler.GeneratedResourcePrefix, el.Name))); err != nil {
+                t.Fatalf("Failed to create EventListener Deployment: %s", err)
+        }
+
+	err = deploymentChangeProgressDeadline(t, c, namespace, fmt.Sprintf("%s-%s", eventReconciler.GeneratedResourcePrefix, el.Name))
+	if err != nil {
+		t.Fatalf("Failed to patch EventListener deployment: %s", err)
+	}
 	// Verify the EventListener to be ready
 	if err := WaitFor(eventListenerReady(t, c, namespace, el.Name)); err != nil {
 		t.Fatalf("EventListener not ready: %s", err)
