@@ -6,6 +6,8 @@ source $(dirname $0)/resolve-yamls.sh
 
 set -x
 
+EXPORT kubectl=oc
+
 readonly API_SERVER=$(oc config view --minify | grep server | awk -F'//' '{print $2}' | awk -F':' '{print $1}')
 readonly OPENSHIFT_REGISTRY="${OPENSHIFT_REGISTRY:-"registry.svc.ci.openshift.org"}"
 readonly TEST_NAMESPACE=tekton-triggers-tests
