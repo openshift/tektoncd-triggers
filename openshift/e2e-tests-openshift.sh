@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 set -e
+export kubectl=oc
 source $(dirname $0)/../vendor/github.com/tektoncd/plumbing/scripts/e2e-tests.sh
 source $(dirname $0)/resolve-yamls.sh
 
 set -x
 
-EXPORT kubectl=oc
 
 readonly API_SERVER=$(oc config view --minify | grep server | awk -F'//' '{print $2}' | awk -F':' '{print $1}')
 readonly OPENSHIFT_REGISTRY="${OPENSHIFT_REGISTRY:-"registry.svc.ci.openshift.org"}"
