@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 
 set -e
-export kubectl=oc
+shopt -s expand_aliases
+alias kubectl=oc
 source $(dirname $0)/../vendor/github.com/tektoncd/plumbing/scripts/e2e-tests.sh
 source $(dirname $0)/resolve-yamls.sh
-
 set -x
+
+yum install -y kubectl
 
 
 readonly API_SERVER=$(oc config view --minify | grep server | awk -F'//' '{print $2}' | awk -F':' '{print $1}')
@@ -26,7 +28,6 @@ function install_tekton_triggers() {
   header "Installing Tekton Triggers"
 
   create_triggers
-
   wait_until_pods_running $TEKTON_TRIGGERS_NAMESPACE || return 1
 
   header "Tekton Triggers Installed successfully"
