@@ -68,7 +68,7 @@ var (
 	ElPort = flag.Int("el-port", 8080,
 		"The container port for the EventListener to listen on.")
 	// ELSetSecurityContext defines if the security context is set.
-	ELSetSecurityContext = flag.Bool("el-security-context", true,
+	ELSetSecurityContext = flag.Bool("el-security-context", false,
 		"Add a security context to the event listener deployment.")
 	// ELReadTimeOut defines the read timeout for EventListener Server
 	ELReadTimeOut = flag.Int64("el-readtimeout", 5,
