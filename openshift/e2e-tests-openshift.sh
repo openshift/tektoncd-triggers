@@ -55,6 +55,8 @@ function install_tekton_triggers() {
 
 function create_triggers() {
   resolve_resources config/ tekton-triggers-resolved.yaml "nothing" $OPENSHIFT_REGISTRY_PREFIX
+  oc apply -f tekton-triggers-resolved.yaml -l 'app.kubernetes.io/part-of=tekton-triggers'
+  oc wait --for=condition=Established --timeout=60s crds/clusterinterceptors.triggers.tekton.dev
   oc apply -f tekton-triggers-resolved.yaml
 }
 
